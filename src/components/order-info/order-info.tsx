@@ -1,31 +1,48 @@
 import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import type { TIngredient } from '@utils-types';
+import { useDispatch, useSelector } from '@/services/store';
+import {
+  getOrderByNumber,
+  selectOrderData,
+  selectFeedIsLoading,
+  selectFeed,
+} from '@/services/slices/feedSlice';
+import { selectOrders } from '@/services/slices/orderSlice';
+import { selectIngredients } from '@/services/slices/ingredientsSlice';
+import { useParams } from 'react-router-dom';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0,
-  };
+  const { number } = useParams<{ number: string }>();
+  const dispatch = useDispatch();
 
-  const ingredients: TIngredient[] = [];
+  const orderData = useSelector(selectOrderData);
+  const isLoading = useSelector(selectFeedIsLoading);
+  const ingredients: TIngredient[] = useSelector(selectIngredients);
 
-  /* Готовим данные для отображения */
+  const allFeedOrders = useSelector(selectFeed);
+  const allProfileOrders = useSelector(selectOrders);
+
+  useEffect(() => {
+    if (number) {
+      void dispatch(getOrderByNumber(Number(number)));
+    }
+  }, [dispatch, number]);
+
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    const currentOrder =
+      orderData ||
+      allFeedOrders.find((item) => item.number === Number(number)) ||
+      allProfileOrders.find((item) => item.number === Number(number));
 
-    const date = new Date(orderData.createdAt);
+    if (!currentOrder || !ingredients.length) return null;
+
+    const date = new Date(currentOrder.createdAt);
 
     type TIngredientsWithCount = Record<string, TIngredient & { count: number }>;
 
-    const ingredientsInfo = orderData.ingredients.reduce(
+    const ingredientsInfo = currentOrder.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
@@ -50,14 +67,14 @@ export const OrderInfo = (): React.JSX.Element => {
     );
 
     return {
-      ...orderData,
+      ...currentOrder,
       ingredientsInfo,
       date,
       total,
     };
-  }, [orderData, ingredients]);
+  }, [orderData, allFeedOrders, allProfileOrders, ingredients, number]);
 
-  if (!orderInfo) {
+  if (isLoading || !orderInfo) {
     return <Preloader />;
   }
 

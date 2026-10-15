@@ -12,8 +12,9 @@ export const ProtectedRoute = ({
   onlyUnAuth = false,
   children,
 }: ProtectedRouteProps) => {
-  const isAuthChecked = useSelector(selectIsAuthChecked);
-  const user = useSelector(selectUser);
+  const isAuthChecked = useSelector((state) => selectIsAuthChecked(state));
+  const user = useSelector((state) => selectUser(state));
+
   const location = useLocation();
 
   if (!isAuthChecked) {
