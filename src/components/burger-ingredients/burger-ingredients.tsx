@@ -1,10 +1,10 @@
+import { selectIngredients } from '@/services/slices/ingredientsSlice';
+import { useSelector } from '@/services/store';
 import { BurgerIngredientsUI } from '@ui';
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 import type { TIngredient, TTabMode } from '@utils-types';
-import { useSelector } from '@/services/store';
-import { selectIngredients } from '@/services/slices/ingredientsSlice';
 
 export const BurgerIngredients = (): React.JSX.Element => {
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');

@@ -18,16 +18,16 @@ export const Register = (): React.JSX.Element => {
   const handleSubmit = (e: SyntheticEvent): void => {
     e.preventDefault();
     dispatch(clearAuthError());
-    dispatch(registerUser({ name: userName, email, password }));
+    void dispatch(registerUser({ name: userName, email, password }));
   };
 
-  const handleClearError = () => {
+  const handleClearError = (): void => {
     dispatch(clearAuthError());
   };
 
   return (
     <RegisterUI
-      errorText={error || ''}
+      errorText={error ?? ''}
       email={email}
       userName={userName}
       password={password}

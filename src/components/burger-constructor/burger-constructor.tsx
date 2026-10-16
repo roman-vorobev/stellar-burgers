@@ -1,19 +1,21 @@
-import { BurgerConstructorUI } from '@ui';
-import { useMemo } from 'react';
-import { useDispatch, useSelector } from '@/services/store';
-import { useNavigate } from 'react-router-dom';
-
-import type { TConstructorIngredient } from '@utils-types';
 import { selectUser } from '@/services/slices/authSlice';
-import { selectBun, selectItems } from '@/services/slices/constructorSlice';
-
-import { removeAllConstructorItems } from '@/services/slices/constructorSlice';
+import {
+  removeAllConstructorItems,
+  selectBun,
+  selectItems,
+} from '@/services/slices/constructorSlice';
 import {
   orderBurger,
   selectOrderIsLoading,
-  selectOrders,
   clearOrderData,
+  selectCurrentOrderData,
 } from '@/services/slices/orderSlice';
+import { useDispatch, useSelector } from '@/services/store';
+import { BurgerConstructorUI } from '@ui';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import type { TConstructorIngredient } from '@utils-types';
 
 export const BurgerConstructor = (): React.JSX.Element | null => {
   const dispatch = useDispatch();
@@ -24,15 +26,12 @@ export const BurgerConstructor = (): React.JSX.Element | null => {
   const user = useSelector(selectUser);
 
   const orderRequest = useSelector(selectOrderIsLoading);
-  const allOrders = useSelector(selectOrders);
 
-  const orderModalData = useMemo(() => {
-    return allOrders.length > 0 ? allOrders[allOrders.length - 1] : null;
-  }, [allOrders]);
+  const orderModalData = useSelector(selectCurrentOrderData);
 
   const constructorItems = useMemo(
     () => ({
-      bun,
+      bun: bun ? { ...bun, id: bun._id } : null,
       ingredients,
     }),
     [bun, ingredients]
@@ -47,12 +46,16 @@ export const BurgerConstructor = (): React.JSX.Element | null => {
     }
 
     const orderData = [bun._id, ...ingredients.map((item) => item._id), bun._id];
-
-    dispatch(orderBurger(orderData));
+    dispatch(orderBurger(orderData))
+      .then((action) => {
+        if (orderBurger.fulfilled.match(action)) {
+          dispatch(removeAllConstructorItems());
+        }
+      })
+      .catch((error) => {
+        console.error('Ошибка при создании заказа:', error);
+      });
   };
-
-  // TODO: Диспатч экшена создания заказа (например, postOrder)
-
   const closeOrderModal = (): void => {
     dispatch(removeAllConstructorItems());
     dispatch(clearOrderData());

@@ -1,3 +1,5 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 // TODO: Заменить на настоящий корневой редьюсер
 import {
   forgotPasswordApi,
@@ -8,12 +10,12 @@ import {
   resetPasswordApi,
   updateUserApi,
 } from '../../utils/burger-api';
-import type { TUser } from '@/utils/types';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { TRegisterData } from '../../utils/burger-api';
 import { deleteCookie, setCookie } from '../../utils/cookie';
 
-interface TUserState {
+import type { TRegisterData } from '../../utils/burger-api';
+import type { TUser } from '@/utils/types';
+
+type TUserState = {
   isAuthChecked: boolean;
   isAuthenticated: boolean;
   isSuccessRegistrarion: boolean;
@@ -22,7 +24,7 @@ interface TUserState {
   data: TUser | null;
   isLoading: boolean;
   error: string | null;
-}
+};
 
 const initialState: TUserState = {
   isAuthChecked: false,
@@ -35,6 +37,11 @@ const initialState: TUserState = {
   error: null,
 };
 
+type PasswordArgs = {
+  password: string;
+  token: string;
+};
+
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }: Omit<TRegisterData, 'name'>, { rejectWithValue }) => {
@@ -43,8 +50,11 @@ export const loginUser = createAsyncThunk(
       setCookie('accessToken', response.accessToken, { expires: 3600 });
       localStorage.setItem('refreshToken', response.refreshToken);
       return response.user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка авторизации');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка авторизации');
     }
   }
 );
@@ -57,8 +67,11 @@ export const registerUser = createAsyncThunk(
       setCookie('accessToken', response.accessToken, { expires: 3600 });
       localStorage.setItem('refreshToken', response.refreshToken);
       return response.user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка регистрации');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка регистрации');
     }
   }
 );
@@ -69,8 +82,11 @@ export const getUser = createAsyncThunk(
     try {
       const response = await getUserApi();
       return response.user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка получения пользователя');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка получения пользователя');
     }
   }
 );
@@ -81,8 +97,11 @@ export const updateUser = createAsyncThunk(
     try {
       const response = await updateUserApi(user);
       return response.user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка обновления данных');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка обновления данных');
     }
   }
 );
@@ -92,8 +111,11 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await logoutApi();
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка выхода');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка выхода');
     } finally {
       deleteCookie('accessToken');
       localStorage.removeItem('refreshToken');
@@ -106,19 +128,25 @@ export const forgotPasswordUser = createAsyncThunk(
   async ({ email }: Pick<TRegisterData, 'email'>, { rejectWithValue }) => {
     try {
       return await forgotPasswordApi({ email }); // Передаем email в API
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка восстановления пароля');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка восстановления пароля');
     }
   }
 );
 
 export const resetPasswordUser = createAsyncThunk(
   'auth/resetPassword',
-  async ({ password, token }: any, { rejectWithValue }) => {
+  async ({ password, token }: PasswordArgs, { rejectWithValue }) => {
     try {
       return await resetPasswordApi({ password, token });
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка сброса пароля');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Ошибка сброса пароля');
     }
   }
 );
@@ -147,10 +175,7 @@ const authSlice = createSlice({
     builder
 
       .addCase(loginUser.pending, (state) => {
-        state.data = null;
         state.isLoading = true;
-        state.isAuthenticated = false;
-        state.isAuthChecked = false;
         state.error = null;
         state.isSuccessRegistrarion = false;
       })
@@ -162,18 +187,13 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.data = null;
         state.isLoading = false;
-        state.isAuthenticated = false;
         state.isAuthChecked = true;
         state.error = action.payload as string;
       })
 
       .addCase(registerUser.pending, (state) => {
-        state.data = null;
         state.isLoading = true;
-        state.isAuthenticated = false;
-        state.isAuthChecked = false;
         state.error = null;
         state.isSuccessRegistrarion = false;
       })

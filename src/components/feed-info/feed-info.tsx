@@ -1,11 +1,12 @@
-import { FeedInfoUI } from '@ui';
-import { useSelector } from '@/services/store'; // используйте ваш типизированный useSelector
 import {
   selectFeed,
   selectFeedCounts,
   selectFeedIsLoading,
   selectFeedError,
 } from '@/services/slices/feedSlice';
+import { useSelector } from '@/services/store'; // используйте ваш типизированный useSelector
+import { FeedInfoUI } from '@ui';
+
 import type { TOrder } from '@utils-types';
 
 const getOrders = (orders: TOrder[], status: string): number[] =>

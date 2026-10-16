@@ -1,17 +1,17 @@
-import { Preloader, OrderInfoUI } from '@ui';
-import { useEffect, useMemo } from 'react';
-
-import type { TIngredient } from '@utils-types';
-import { useDispatch, useSelector } from '@/services/store';
 import {
   getOrderByNumber,
   selectOrderData,
   selectFeedIsLoading,
   selectFeed,
 } from '@/services/slices/feedSlice';
-import { selectOrders } from '@/services/slices/orderSlice';
 import { selectIngredients } from '@/services/slices/ingredientsSlice';
+import { selectOrders } from '@/services/slices/orderSlice';
+import { useDispatch, useSelector } from '@/services/store';
+import { Preloader, OrderInfoUI } from '@ui';
+import { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+
+import type { TIngredient } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
   const { number } = useParams<{ number: string }>();
@@ -32,8 +32,8 @@ export const OrderInfo = (): React.JSX.Element => {
 
   const orderInfo = useMemo(() => {
     const currentOrder =
-      orderData ||
-      allFeedOrders.find((item) => item.number === Number(number)) ||
+      orderData ??
+      allFeedOrders.find((item) => item.number === Number(number)) ??
       allProfileOrders.find((item) => item.number === Number(number));
 
     if (!currentOrder || !ingredients.length) return null;

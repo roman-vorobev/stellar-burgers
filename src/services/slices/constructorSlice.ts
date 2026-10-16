@@ -1,18 +1,17 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
+
+import type { RootState } from '../rootReducer';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { TConstructorIngredient, TIngredient } from '@utils-types';
-import type { RootState } from '../rootReducer';
 
-export interface IConstructorState {
-  bun: TConstructorIngredient | null;
+type TConstructorState = {
+  bun: TIngredient | null;
   constructorItems: TConstructorIngredient[];
-  maxId: number;
-}
+};
 
-export const initialState: IConstructorState = {
+export const initialState: TConstructorState = {
   bun: null,
   constructorItems: [],
-  maxId: 0,
 };
 
 const constructorSlice = createSlice({
@@ -28,7 +27,7 @@ const constructorSlice = createSlice({
           state.constructorItems.push(item);
         }
       },
-      prepare: (item: TIngredient) => ({
+      prepare: (item: TIngredient): { payload: TConstructorIngredient } => ({
         payload: {
           ...item,
           _id: item._id,
@@ -46,22 +45,18 @@ const constructorSlice = createSlice({
       state.bun = null;
     },
     moveUpConstructorItems: (state, action: PayloadAction<string>) => {
-      state.constructorItems = moveItem(state.constructorItems, action.payload, 1);
+      state.constructorItems = moveItem(state.constructorItems, action.payload, 'up');
     },
     moveDownConstructorItems: (state, action: PayloadAction<string>) => {
-      state.constructorItems = moveItem(state.constructorItems, action.payload, 2);
+      state.constructorItems = moveItem(state.constructorItems, action.payload, 'down');
     },
-  },
-  selectors: {
-    selectItems: (sliceState) => sliceState.constructorItems,
-    selectBun: (sliceState) => sliceState.bun,
   },
 });
 
 function moveItem(
   arr: TConstructorIngredient[],
   id: string,
-  mode: 1 | 2
+  mode: 'up' | 'down'
 ): TConstructorIngredient[] {
   const item = arr.find((x) => x.id === id);
   if (!item) {
@@ -74,7 +69,7 @@ function moveItem(
   }
   const result = [...arr];
 
-  if (mode === 1) {
+  if (mode === 'up') {
     if (index > 0) {
       result[index] = result[index - 1];
       result[index - 1] = item;
@@ -95,6 +90,10 @@ export const {
   moveUpConstructorItems,
   moveDownConstructorItems,
 } = constructorSlice.actions;
-export const selectItems = (state: RootState) => state.constructors.constructorItems;
-export const selectBun = (state: RootState) => state.constructors.bun;
+export const selectItems = (state: RootState): TConstructorIngredient[] =>
+  state.constructors.constructorItems;
+
+export const selectBun = (state: RootState): TIngredient | null =>
+  state.constructors.bun;
+
 export default constructorSlice.reducer;

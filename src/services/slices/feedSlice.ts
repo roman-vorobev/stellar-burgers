@@ -1,20 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 import { getFeedsApi, getOrderByNumberApi } from '../../utils/burger-api';
-import type { PayloadAction } from '@reduxjs/toolkit';
+
 import type { TOrder } from '@/utils/types';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 export type TFeedCounts = {
   total: number;
   totalToday: number;
 };
 
-interface TFeedsState {
+type TFeedsState = {
   orders: TOrder[];
   orderData: TOrder | null;
   counts: TFeedCounts;
   isLoading: boolean;
   error: string | null;
-}
+};
 
 const counts: TFeedCounts = {
   total: 0,
@@ -36,8 +38,11 @@ export const getOrderByNumber = createAsyncThunk(
   async (number: number, { rejectWithValue }) => {
     try {
       return await getOrderByNumberApi(number);
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Не удалось загрузить заказ');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Не удалось загрузить заказ');
     }
   }
 );

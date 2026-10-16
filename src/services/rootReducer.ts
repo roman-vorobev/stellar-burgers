@@ -1,9 +1,10 @@
 //TODO: Собрать здесь редьюсеры слайсов
 //: Record<string, never>
 import { combineReducers } from '@reduxjs/toolkit';
+
 import authReducer from './slices/authSlice';
-import dataReducer from './slices/dataSlice';
 import constructorReducer from './slices/constructorSlice';
+import dataReducer from './slices/dataSlice';
 import feedReducer from './slices/feedSlice';
 import ingredientsReducer from './slices/ingredientsSlice';
 import orderReducer from './slices/orderSlice';

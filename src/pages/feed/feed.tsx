@@ -2,9 +2,9 @@ import { getFeeds, selectFeed, selectFeedIsLoading } from '@/services/slices/fee
 import { useDispatch, useSelector, type AppDispatch } from '@/services/store';
 import { Preloader } from '@ui';
 import { FeedUI } from '@ui-pages';
+import { useEffect } from 'react';
 
 import type { TOrder } from '@utils-types';
-import { useEffect } from 'react';
 
 export const Feed = (): React.JSX.Element => {
   // TODO: Взять переменную из стора
@@ -13,7 +13,7 @@ export const Feed = (): React.JSX.Element => {
   const isLoading = useSelector(selectFeedIsLoading);
 
   const handleGetFeeds = (): void => {
-    dispatch(getFeeds());
+    void dispatch(getFeeds());
   };
 
   useEffect(() => {

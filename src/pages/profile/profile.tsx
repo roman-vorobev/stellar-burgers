@@ -17,8 +17,8 @@ export const Profile = (): React.JSX.Element => {
   useEffect(() => {
     setFormValue((prevState) => ({
       ...prevState,
-      name: user?.name || '',
-      email: user?.email || '',
+      name: user?.name ?? '',
+      email: user?.email ?? '',
     }));
   }, [user]);
 
@@ -29,7 +29,7 @@ export const Profile = (): React.JSX.Element => {
 
   const handleSubmit = (e: SyntheticEvent): void => {
     e.preventDefault();
-    dispatch(updateUser(formValue));
+    void dispatch(updateUser(formValue));
     setFormValue((prevState) => ({
       ...prevState,
       password: '',

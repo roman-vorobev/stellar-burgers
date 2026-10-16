@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 import { getIngredientsApi } from '../../utils/burger-api';
+
 import type { TIngredient } from '@/utils/types';
 
-interface DataState {
+type DataState = {
   ingredients: TIngredient[];
   isLoading: boolean;
   error: string | null;
-}
+};
 
 const initialState: DataState = {
   ingredients: [],
@@ -22,8 +24,11 @@ export const fetchingIngredients = createAsyncThunk<
   try {
     const data = await getIngredientsApi();
     return data;
-  } catch (error: any) {
-    return rejectWithValue(error.message || 'Не удалось загрузить ингредиенты');
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return rejectWithValue(error.message);
+    }
+    return rejectWithValue('Не удалось загрузить ингредиенты');
   }
 });
 
@@ -47,7 +52,7 @@ const dataSlice = createSlice({
       })
       .addCase(fetchingIngredients.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload!;
       });
   },
 });

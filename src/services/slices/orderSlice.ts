@@ -1,15 +1,16 @@
-import { getOrdersApi, orderBurgerApi } from '../../utils/burger-api'; // <-- Добавили импорт orderBurgerApi
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import type { TOrder } from '@utils-types';
-import type { RootState } from '../rootReducer';
+import { getOrdersApi, orderBurgerApi } from '../../utils/burger-api'; // <-- Добавили импорт orderBurgerApi
 
-interface TUserState {
+import type { RootState } from '../rootReducer';
+import type { TOrder } from '@utils-types';
+
+type TUserState = {
   orders: TOrder[];
   orderData: TOrder | null;
   isLoading: boolean;
   error: string | null;
-}
+};
 
 const initialState: TUserState = {
   orders: [],
@@ -23,8 +24,11 @@ export const getOrders = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       return await getOrdersApi();
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Не удалось загрузить заказы');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Не удалось загрузить заказы');
     }
   }
 );
@@ -35,8 +39,11 @@ export const orderBurger = createAsyncThunk(
     try {
       const response = await orderBurgerApi(ingredientsIds);
       return response.order;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Не удалось оформить заказ');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Не удалось оформить заказ');
     }
   }
 );
@@ -46,7 +53,7 @@ const orderSlice = createSlice({
   initialState,
   reducers: {
     clearOrderData: (state) => {
-      state.orders = [];
+      state.orderData = null;
     },
   },
   extraReducers: (builder) => {
@@ -66,7 +73,7 @@ const orderSlice = createSlice({
         state.orders = [];
         state.isLoading = false;
         state.error =
-          (action.payload as string) || action.error.message || 'Ошибка загрузки';
+          (action.payload as string) ?? action.error.message ?? 'Ошибка загрузки';
       })
 
       .addCase(orderBurger.pending, (state) => {
@@ -75,20 +82,22 @@ const orderSlice = createSlice({
       })
       .addCase(orderBurger.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.orderData = action.payload;
         state.orders.push(action.payload);
         state.error = null;
       })
       .addCase(orderBurger.rejected, (state, action) => {
         state.isLoading = false;
         state.error =
-          (action.payload as string) || action.error.message || 'Ошибка оформления';
+          (action.payload as string) ?? action.error.message ?? 'Ошибка оформления';
       });
   },
 });
 
 export const { clearOrderData } = orderSlice.actions;
-export const selectOrders = (state: RootState) => state.order.orders;
-export const selectOrderIsLoading = (state: RootState) => state.order.isLoading;
-export const selectOrdersError = (state: RootState) => state.order.error;
-export const selectCurrentOrderData = (state: RootState) => state.order.orderData;
+export const selectOrders = (state: RootState): TOrder[] => state.order.orders;
+export const selectOrderIsLoading = (state: RootState): boolean => state.order.isLoading;
+export const selectOrdersError = (state: RootState): string | null => state.order.error;
+export const selectCurrentOrderData = (state: RootState): TOrder | null =>
+  state.order.orderData;
 export default orderSlice.reducer;
