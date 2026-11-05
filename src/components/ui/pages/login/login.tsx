@@ -16,6 +16,7 @@ export const LoginUI = ({
   handleSubmit,
   password,
   setPassword,
+  onClearError,
 }: LoginUIProps): React.JSX.Element => (
   <main className={styles.container}>
     <div className={`pt-6 ${styles.wrapCenter}`}>
@@ -55,7 +56,7 @@ export const LoginUI = ({
       </form>
       <div className={`pb-4 ${styles.question} text text_type_main-default`}>
         Вы - новый пользователь?
-        <Link to="/register" className={`pl-2 ${styles.link}`}>
+        <Link to="/register" className={`pl-2 ${styles.link}`} onClick={onClearError}>
           Зарегистрироваться
         </Link>
       </div>

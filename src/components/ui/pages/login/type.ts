@@ -4,4 +4,5 @@ import type { Dispatch, SetStateAction } from 'react';
 export type LoginUIProps = PageUIProps & {
   password: string;
   setPassword: Dispatch<SetStateAction<string>>;
+  onClearError: () => void;
 };
