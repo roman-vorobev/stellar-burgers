@@ -15,7 +15,7 @@ import { deleteCookie, setCookie } from '../../utils/cookie';
 import type { TRegisterData } from '../../utils/burger-api';
 import type { TUser } from '@/utils/types';
 
-type TUserState = {
+export type TUserState = {
   isAuthChecked: boolean;
   isAuthenticated: boolean;
   isSuccessRegistrarion: boolean;
