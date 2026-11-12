@@ -13,7 +13,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
-  testMatch: '*.pl.tsx',
+  testMatch: ['**/constructor.pl.tsx', '**/*.spec.ts'],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -75,6 +75,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run start',
     url: 'http://localhost:4000',
+    env: { BURGER_API_URL: 'https://norma.ffapi.ru/api' },
     reuseExistingServer: !process.env.CI,
-  }
+  },
 });

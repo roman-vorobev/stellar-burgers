@@ -23,7 +23,7 @@ const counts: TFeedCounts = {
   totalToday: 0,
 };
 
-const initialState: TFeedsState = {
+export const initialState: TFeedsState = {
   orders: [],
   orderData: null,
   counts: counts,
