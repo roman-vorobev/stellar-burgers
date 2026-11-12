@@ -41,7 +41,10 @@ describe('Тестирование редьюсера constructorSlice', () => {
   test('возвращает начальное состояние при вызове с undefined и неизвестным экшеном (unknown)', () => {
     const action = { type: 'unknown' };
     const state = burgerConstructorReducer(undefined, action);
-    expect(state).toEqual(initialState);
+    expect(state).toEqual({
+      bun: null,
+      constructorItems: [],
+    });
   });
 
   test('Проверка добавления булки (bun) в конструктор через метод addConstructorItems', () => {
@@ -70,17 +73,22 @@ describe('Тестирование редьюсера constructorSlice', () => {
   });
 
   test('Проверка удаления ингредиента по id через метод removeConstructorItems', () => {
-    const ingredientWithId: TConstructorIngredient = {
+    const firstIngredient: TConstructorIngredient = {
       ...mockMainIngredient,
       id: '212',
     };
+    const secondIngredient: TConstructorIngredient = {
+      ...mockMainIngredient,
+      id: '213',
+    };
     const prepState = {
-      ...initialState,
-      constructorItems: [ingredientWithId],
+      bun: null,
+      constructorItems: [firstIngredient, secondIngredient],
     };
     const action = removeConstructorItems('212');
     const state = burgerConstructorReducer(prepState, action);
-    expect(state.constructorItems).toHaveLength(0);
+    expect(state.constructorItems).toHaveLength(1);
+    expect(state.constructorItems).toEqual([secondIngredient]);
   });
 
   test('Проверка перемещения ингредиента вверх через мктод moveUpConstructorItems', () => {

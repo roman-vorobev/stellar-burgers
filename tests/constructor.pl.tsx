@@ -43,36 +43,15 @@ test.describe('adding ingredients to constructor works correctly', function () {
   });
 
   test('Create order', async ({ page, context }) => {
-    await page.routeFromHAR('tests/hars/ingredients.har', {
-      url: '**/api/ingredients',
+    await page.routeFromHAR('tests/hars/user.har', {
+      url: '**/api/auth/user',
       update: false,
     });
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          user: {
-            email: 'test@tests.ru',
-            name: 'Роман',
-          },
-        }),
-      });
+    await page.routeFromHAR('tests/hars/orders.har', {
+      url: '**/api/orders',
+      update: false,
     });
-    await page.route('**/api/orders', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          name: 'Краторный био-бургер',
-          order: {
-            number: 121,
-          },
-        }),
-      });
-    });
+
     await context.addCookies([
       {
         name: 'accessToken',
@@ -86,6 +65,7 @@ test.describe('adding ingredients to constructor works correctly', function () {
     });
 
     await page.goto('http://localhost:4000');
+
     await page
       .locator('li')
       .filter({ hasText: 'Краторная булка N-200i' })
@@ -101,11 +81,25 @@ test.describe('adding ingredients to constructor works correctly', function () {
       .filter({ hasText: 'Филе Люминесцентного тетраодонтимформа' })
       .getByRole('button')
       .click();
+
     await page.getByRole('button', { name: 'Оформить заказ' }).click();
+
     const modal = page.getByText('Ваш заказ начали готовить');
     await expect(modal).toBeVisible();
+
     await expect(page.getByText('121')).toBeVisible();
-    await expect(page.getByText('Выберите булки').first()).toBeVisible();
+
+    const constructorSection = page
+      .locator('section')
+      .filter({ has: page.getByRole('button', { name: 'Оформить заказ' }) });
+
+    await expect(constructorSection.getByText('Выберите булки').first()).toBeVisible();
+    await expect(constructorSection.getByText('Выберите начинку')).toBeVisible();
+    await expect(constructorSection.getByText('Биокотлета')).toBeHidden();
+    await expect(
+      constructorSection.getByText('Филе Люминесцентного тетраодонтимформа')
+    ).toBeHidden();
+
     await page.getByLabel('Закрыть').click();
     await expect(modal).toBeHidden();
   });
